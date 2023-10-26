@@ -394,6 +394,10 @@ open class SwiftyCamViewController: UIViewController {
 	override open func viewDidAppear(_ animated: Bool) {
 		super.viewDidAppear(animated)
 
+        guard let interfaceOrientation = view.window?.windowScene?.interfaceOrientation else {
+            return
+        }
+
 		// Subscribe to device rotation notifications
 
 		if shouldUseDeviceOrientation {
@@ -413,7 +417,8 @@ open class SwiftyCamViewController: UIViewController {
 
                 // Preview layer video orientation can be set only after the connection is created
                 DispatchQueue.main.async {
-                    self.previewLayer.videoPreviewLayer.connection?.videoOrientation = self.orientation.getPreviewLayerOrientation()
+                    let layerOrientation = self.orientation.getPreviewLayerOrientation(interfaceOrientation: interfaceOrientation)
+                    self.previewLayer.videoPreviewLayer.connection?.videoOrientation = layerOrientation
                 }
 
 			case .notAuthorized:
@@ -945,7 +950,7 @@ extension SwiftyCamViewController {
 
     private var firstCaptureDevice: AVCaptureDevice? {
         AVCaptureDevice.DiscoverySession(
-            deviceTypes: [.builtInDualCamera, .builtInWideAngleCamera],
+            deviceTypes: [.builtInTripleCamera, .builtInDualCamera, .builtInWideAngleCamera],
             mediaType: .video,
             position: .unspecified
         ).devices.first

@@ -60,19 +60,14 @@ class Orientation  {
         }
     }
     
-    func getPreviewLayerOrientation() -> AVCaptureVideoOrientation {
+    func getPreviewLayerOrientation(interfaceOrientation: UIInterfaceOrientation) -> AVCaptureVideoOrientation {
         // Depends on layout orientation, not device orientation
-        switch UIApplication.shared.statusBarOrientation {
-        case .portrait, .unknown:
-            return AVCaptureVideoOrientation.portrait
-        case .landscapeLeft:
-            return AVCaptureVideoOrientation.landscapeLeft
-        case .landscapeRight:
-            return AVCaptureVideoOrientation.landscapeRight
-        case .portraitUpsideDown:
-            return AVCaptureVideoOrientation.portraitUpsideDown
-        @unknown default:
-            return .portrait
+        switch interfaceOrientation {
+        case .portrait, .unknown: return .portrait
+        case .landscapeLeft: return .landscapeLeft
+        case .landscapeRight: return .landscapeRight
+        case .portraitUpsideDown: return .portraitUpsideDown
+        @unknown default: return .portrait
         }
     }
     
