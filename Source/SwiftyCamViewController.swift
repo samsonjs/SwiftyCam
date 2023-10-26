@@ -761,8 +761,9 @@ open class SwiftyCamViewController: UIViewController {
 
 	/// Get Devices
 
-    fileprivate class func defaultCaptureDevice(preferringPosition position: AVCaptureDevice.Position = .back) -> AVCaptureDevice? {
+    fileprivate class func defaultCaptureDevice(preferringPosition position: AVCaptureDevice.Position) -> AVCaptureDevice? {
         AVCaptureDevice.default(.builtInTripleCamera, for: .video, position: position)
+            ?? AVCaptureDevice.default(.builtInDualCamera, for: .video, position: position)
             ?? AVCaptureDevice.default(.builtInWideAngleCamera, for: .video, position: position)
 	}
 
@@ -910,7 +911,7 @@ extension SwiftyCamViewController {
 			return
 		}
 		do {
-            let captureDevice = Self.defaultCaptureDevice()
+            let captureDevice = Self.defaultCaptureDevice(preferringPosition: currentCamera.captureDevicePosition)
 			try captureDevice?.lockForConfiguration()
 
 			zoomScale = min(maxZoomScale, max(1.0, min(beginZoomScale * pinch.scale,  captureDevice!.activeFormat.videoMaxZoomFactor)))
@@ -985,7 +986,7 @@ extension SwiftyCamViewController {
         let translationDifference = currentTranslation - previousPanTranslation
 
         do {
-            let captureDevice = Self.defaultCaptureDevice()
+            let captureDevice = Self.defaultCaptureDevice(preferringPosition: currentCamera.captureDevicePosition)
             try captureDevice?.lockForConfiguration()
 
             let currentZoom = captureDevice?.videoZoomFactor ?? 0.0
