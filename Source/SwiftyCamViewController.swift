@@ -663,10 +663,12 @@ open class SwiftyCamViewController: UIViewController {
             videoDevice.automaticallyEnablesLowLightBoostWhenAvailable = true
         }
 
-        // Start out using the wide camera focal length when we have a triple cam. This
-        // must be done after adding the video device input to the session.
+        // Start out using the wide camera focal length when we have a triple or dual-wide cam.
+        // This must be done after adding the video device input to the session.
         let zoomBoundaries = videoDevice.virtualDeviceSwitchOverVideoZoomFactors
         if videoDevice.deviceType == .builtInTripleCamera, let zoom = zoomBoundaries.first?.doubleValue {
+            videoDevice.videoZoomFactor = zoom
+        } else if videoDevice.deviceType == .builtInDualWideCamera, let zoom = zoomBoundaries.first?.doubleValue {
             videoDevice.videoZoomFactor = zoom
         }
 
@@ -764,6 +766,7 @@ open class SwiftyCamViewController: UIViewController {
     fileprivate class func defaultCaptureDevice(preferringPosition position: AVCaptureDevice.Position) -> AVCaptureDevice? {
         AVCaptureDevice.default(.builtInTripleCamera, for: .video, position: position)
             ?? AVCaptureDevice.default(.builtInDualCamera, for: .video, position: position)
+            ?? AVCaptureDevice.default(.builtInDualWideCamera, for: .video, position: position)
             ?? AVCaptureDevice.default(.builtInWideAngleCamera, for: .video, position: position)
 	}
 
