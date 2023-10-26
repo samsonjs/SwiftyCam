@@ -616,56 +616,62 @@ open class SwiftyCamViewController: UIViewController {
 
 	fileprivate func addVideoInput() {
         videoDevice = SwiftyCamViewController.defaultCaptureDevice(preferringPosition: currentCamera.captureDevicePosition)
-
-		if let device = videoDevice {
-			do {
-				try device.lockForConfiguration()
-				if device.isFocusModeSupported(.continuousAutoFocus) {
-					device.focusMode = .continuousAutoFocus
-					if device.isSmoothAutoFocusSupported {
-						device.isSmoothAutoFocusEnabled = true
-					}
-				}
-
-				if device.isExposureModeSupported(.continuousAutoExposure) {
-					device.exposureMode = .continuousAutoExposure
-				}
-
-				if device.isWhiteBalanceModeSupported(.continuousAutoWhiteBalance) {
-					device.whiteBalanceMode = .continuousAutoWhiteBalance
-				}
-
-				if device.isLowLightBoostSupported && lowLightBoost == true {
-					device.automaticallyEnablesLowLightBoostWhenAvailable = true
-				}
-
-				device.unlockForConfiguration()
-			} catch {
-				print("[SwiftyCam]: Error locking configuration")
-			}
-		}
+        guard let videoDevice else { return }
 
 		do {
-            if let videoDevice = videoDevice {
-                let videoDeviceInput = try AVCaptureDeviceInput(device: videoDevice)
-                if session.canAddInput(videoDeviceInput) {
-                    session.addInput(videoDeviceInput)
-                    self.videoDeviceInput = videoDeviceInput
-                } else {
-                    print("[SwiftyCam]: Could not add video device input to the session")
-                    print(session.canSetSessionPreset(AVCaptureSession.Preset(rawValue: videoInputPresetFromVideoQuality(quality: videoQuality))))
-                    setupResult = .configurationFailed
-                    session.commitConfiguration()
-                    return
-                }
+            let videoDeviceInput = try AVCaptureDeviceInput(device: videoDevice)
+            if session.canAddInput(videoDeviceInput) {
+                session.addInput(videoDeviceInput)
+                self.videoDeviceInput = videoDeviceInput
+            } else {
+                print("[SwiftyCam]: Could not add video device input to the session")
+                print(session.canSetSessionPreset(AVCaptureSession.Preset(rawValue: videoInputPresetFromVideoQuality(quality: videoQuality))))
+                setupResult = .configurationFailed
+                session.commitConfiguration()
+                return
             }
-			
+        } catch {
+            print("[SwiftyCam]: Could not create video device input: \(error)")
+            setupResult = .configurationFailed
+            return
+        }
+
+        do {
+            try videoDevice.lockForConfiguration()
 		} catch {
-			print("[SwiftyCam]: Could not create video device input: \(error)")
+			print("[SwiftyCam]: Could not lock video device for configuration: \(error)")
 			setupResult = .configurationFailed
-			return
+            return
 		}
-	}
+
+        if videoDevice.isFocusModeSupported(.continuousAutoFocus) {
+            videoDevice.focusMode = .continuousAutoFocus
+            if videoDevice.isSmoothAutoFocusSupported {
+                videoDevice.isSmoothAutoFocusEnabled = true
+            }
+        }
+
+        if videoDevice.isExposureModeSupported(.continuousAutoExposure) {
+            videoDevice.exposureMode = .continuousAutoExposure
+        }
+
+        if videoDevice.isWhiteBalanceModeSupported(.continuousAutoWhiteBalance) {
+            videoDevice.whiteBalanceMode = .continuousAutoWhiteBalance
+        }
+
+        if videoDevice.isLowLightBoostSupported && lowLightBoost == true {
+            videoDevice.automaticallyEnablesLowLightBoostWhenAvailable = true
+        }
+
+        // Start out using the wide camera focal length when we have a triple cam. This
+        // must be done after adding the video device input to the session.
+        let zoomBoundaries = videoDevice.virtualDeviceSwitchOverVideoZoomFactors
+        if videoDevice.deviceType == .builtInTripleCamera, let zoom = zoomBoundaries.first?.doubleValue {
+            videoDevice.videoZoomFactor = zoom
+        }
+
+        videoDevice.unlockForConfiguration()
+    }
 
 	/// Add Audio Inputs
 
@@ -756,8 +762,8 @@ open class SwiftyCamViewController: UIViewController {
 	/// Get Devices
 
     fileprivate class func defaultCaptureDevice(preferringPosition position: AVCaptureDevice.Position = .back) -> AVCaptureDevice? {
-        AVCaptureDevice.default(AVCaptureDevice.DeviceType.builtInTripleCamera, for: .video, position: position)
-            ?? AVCaptureDevice.default(AVCaptureDevice.DeviceType.builtInWideAngleCamera, for: .video, position: position)
+        AVCaptureDevice.default(.builtInTripleCamera, for: .video, position: position)
+            ?? AVCaptureDevice.default(.builtInWideAngleCamera, for: .video, position: position)
 	}
 
 	/// Enable flash
