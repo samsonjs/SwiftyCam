@@ -27,7 +27,6 @@ class ViewController: SwiftyCamViewController, SwiftyCamViewControllerDelegate {
 		super.viewDidLoad()
         shouldPrompToAppSettings = true
 		cameraDelegate = self
-		maximumVideoDuration = 10.0
         shouldUseDeviceOrientation = true
         allowAutoRotate = true
         audioEnabled = true
@@ -55,11 +54,6 @@ class ViewController: SwiftyCamViewController, SwiftyCamViewControllerDelegate {
         captureButton.buttonEnabled = false
     }
     
-
-	func swiftyCam(_ swiftyCam: SwiftyCamViewController, didTake photo: UIImage) {
-		let newVC = PhotoViewController(image: photo)
-		self.present(newVC, animated: true, completion: nil)
-	}
 
 	func swiftyCam(_ swiftyCam: SwiftyCamViewController, didBeginRecordingVideo camera: SwiftyCamViewController.CameraSelection) {
 		print("Did Begin Recording")

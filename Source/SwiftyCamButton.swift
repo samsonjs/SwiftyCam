@@ -20,33 +20,21 @@ import UIKit
 
 /// Delegate for SwiftyCamButton
 
-public protocol SwiftyCamButtonDelegate: class {
+public protocol SwiftyCamButtonDelegate: AnyObject {
     
-    /// Called when UITapGestureRecognizer begins
-    
-    func buttonWasTapped()
-    
-    /// Called When UILongPressGestureRecognizer enters UIGestureRecognizerState.began
-    
-    func buttonDidBeginLongPress()
-    
-    /// Called When UILongPressGestureRecognizer enters UIGestureRecognizerState.end
+    /// Called when the button is first pressed
 
-    func buttonDidEndLongPress()
+    func buttonDidBeginPress()
     
-    /// Called when the maximum duration is reached
-    
-    func longPressDidReachMaximumDuration()
-    
-    /// Sets the maximum duration of the video recording
-    
-    func setMaxiumVideoDuration() -> Double
+    /// Called when the button is released
+
+    func buttonDidEndPress()
 }
 
 // MARK: Public View Declaration
 
 
-/// UIButton Subclass for Capturing Photo and Video with SwiftyCamViewController
+/// UIButton Subclass for Capturing Video with SwiftyCamViewController
 
 open class SwiftyCamButton: UIButton {
     
@@ -58,84 +46,27 @@ open class SwiftyCamButton: UIButton {
     
     public var buttonEnabled = true
     
-    /// Maximum duration variable
-    
-    fileprivate var timer : Timer?
-    
-    /// Initialization Declaration
-    
-    override public init(frame: CGRect) {
-        super.init(frame: frame)
-        createGestureRecognizers()
-    }
-    
-    /// Initialization Declaration
+    open override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
+        super.touchesBegan(touches, with: event)
 
-    
-    required public init?(coder aDecoder: NSCoder) {
-        super.init(coder: aDecoder)
-        createGestureRecognizers()
-    }
-    
-    /// UITapGestureRecognizer Function
-    
-    @objc fileprivate func Tap() {
-        guard buttonEnabled == true else {
-            return
-        }
-        
-       delegate?.buttonWasTapped()
-    }
-    
-    /// UILongPressGestureRecognizer Function
-    @objc fileprivate func LongPress(_ sender:UILongPressGestureRecognizer!)  {
-        guard buttonEnabled == true else {
-            return
-        }
-        
-        switch sender.state {
-        case .began:
-            delegate?.buttonDidBeginLongPress()
-            startTimer()
-        case .cancelled, .ended, .failed:
-            invalidateTimer()
-            delegate?.buttonDidEndLongPress()
-        default:
-            break
+        if buttonEnabled {
+            delegate?.buttonDidBeginPress()
         }
     }
-    
-    /// Timer Finished
-    
-    @objc fileprivate func timerFinished() {
-        invalidateTimer()
-        delegate?.longPressDidReachMaximumDuration()
-    }
-    
-    /// Start Maximum Duration Timer
-    
-    fileprivate func startTimer() {
-        if let duration = delegate?.setMaxiumVideoDuration() {
-            //Check if duration is set, and greater than zero
-            if duration != 0.0 && duration > 0.0 {
-                timer = Timer.scheduledTimer(timeInterval: duration, target: self, selector:  #selector(SwiftyCamButton.timerFinished), userInfo: nil, repeats: false)
-            }
+
+    open override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
+        super.touchesEnded(touches, with: event)
+
+        if buttonEnabled {
+            delegate?.buttonDidEndPress()
         }
     }
-    
-    // End timer if UILongPressGestureRecognizer is ended before time has ended
-    
-    fileprivate func invalidateTimer() {
-        timer?.invalidate()
-        timer = nil
-    }
-    
-    // Add Tap and LongPress gesture recognizers
-    
-    fileprivate func createGestureRecognizers() {
-        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(SwiftyCamButton.Tap))
-        let longGesture = UILongPressGestureRecognizer(target: self, action: #selector(SwiftyCamButton.LongPress))
-        self.addGestureRecognizer(tapGesture)
-        self.addGestureRecognizer(longGesture)
+
+    open override func touchesCancelled(_ touches: Set<UITouch>, with event: UIEvent?) {
+        super.touchesCancelled(touches, with: event)
+
+        if buttonEnabled {
+            delegate?.buttonDidEndPress()
+        }
     }
 }

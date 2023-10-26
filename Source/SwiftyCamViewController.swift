@@ -115,22 +115,10 @@ open class SwiftyCamViewController: UIViewController {
 
 	public weak var cameraDelegate: SwiftyCamViewControllerDelegate?
 
-	/// Maxiumum video duration if SwiftyCamButton is used
-
-	public var maximumVideoDuration : Double     = 0.0
-
 	/// Video capture quality
 
 	public var videoQuality : VideoQuality       = .high
 
-	/// Sets whether flash is enabled for photo and video capture
-    @available(*, deprecated, message: "use flashMode .on or .off") //use flashMode
-    public var flashEnabled: Bool = false {
-        didSet{
-            self.flashMode = self.flashEnabled ? .on : .off
-        }
-    }
-    
     // Flash Mode
     public var flashMode:FlashMode               = .off
 
@@ -172,7 +160,7 @@ open class SwiftyCamViewController: UIViewController {
 
 	public var defaultCamera                   = CameraSelection.rear
 
-	/// Sets wether the taken photo or video should be oriented according to the device orientation
+	/// Sets wether the taken video should be oriented according to the device orientation
 
     public var shouldUseDeviceOrientation      = false {
         didSet {
@@ -258,10 +246,6 @@ open class SwiftyCamViewController: UIViewController {
 	/// Movie File Output variable
 
 	fileprivate var movieFileOutput              : AVCaptureMovieFileOutput?
-
-	/// Photo File Output variable
-
-	fileprivate var photoFileOutput              : AVCaptureStillImageOutput?
 
 	/// Video Device variable
 
@@ -477,31 +461,6 @@ open class SwiftyCamViewController: UIViewController {
 
 	/**
 
-	Capture photo from current session
-
-	UIImage will be returned with the SwiftyCamViewControllerDelegate function SwiftyCamDidTakePhoto(photo:)
-
-	*/
-
-	public func takePhoto() {
-
-		guard let device = videoDevice else {
-			return
-		}
-
-        if device.hasFlash == true && flashMode != .off /* TODO: Add Support for Retina Flash and add front flash */ {
-            changeFlashSettings(device: device, mode: flashMode)
-			capturePhotoAsyncronously(completionHandler: { (_) in })
-        }else{
-			if device.isFlashActive == true {
-				changeFlashSettings(device: device, mode: flashMode)
-			}
-			capturePhotoAsyncronously(completionHandler: { (_) in })
-		}
-	}
-
-	/**
-
 	Begin recording video of current session
 
 	SwiftyCamViewControllerDelegate function SwiftyCamDidBeginRecordingVideo() will be called
@@ -662,7 +621,6 @@ open class SwiftyCamViewController: UIViewController {
 		addVideoInput()
 		addAudioInput()
 		configureVideoOutput()
-		configurePhotoOutput()
 
 		session.commitConfiguration()
 	}
@@ -790,77 +748,14 @@ open class SwiftyCamViewController: UIViewController {
 					connection.preferredVideoStabilizationMode = .auto
 				}
 
-				if #available(iOS 11.0, *) {
-                    if let videoCodecType = videoCodecType {
-                        if movieFileOutput.availableVideoCodecTypes.contains(videoCodecType) == true {
-                            // Use the H.264 codec to encode the video.
-                            movieFileOutput.setOutputSettings([AVVideoCodecKey: videoCodecType], for: connection)
-                        }
+                if let videoCodecType = videoCodecType {
+                    if movieFileOutput.availableVideoCodecTypes.contains(videoCodecType) == true {
+                        // Use the H.264 codec to encode the video.
+                        movieFileOutput.setOutputSettings([AVVideoCodecKey: videoCodecType], for: connection)
                     }
                 }
 			}
 			self.movieFileOutput = movieFileOutput
-		}
-	}
-
-	/// Configure Photo Output
-
-	fileprivate func configurePhotoOutput() {
-		let photoFileOutput = AVCaptureStillImageOutput()
-
-		if self.session.canAddOutput(photoFileOutput) {
-			photoFileOutput.outputSettings  = [AVVideoCodecKey: AVVideoCodecJPEG]
-			self.session.addOutput(photoFileOutput)
-			self.photoFileOutput = photoFileOutput
-		}
-	}
-
-
-	/**
-	Returns a UIImage from Image Data.
-
-	- Parameter imageData: Image Data returned from capturing photo from the capture session.
-
-	- Returns: UIImage from the image data, adjusted for proper orientation.
-	*/
-
-	fileprivate func processPhoto(_ imageData: Data) -> UIImage {
-		let dataProvider = CGDataProvider(data: imageData as CFData)
-		let cgImageRef = CGImage(jpegDataProviderSource: dataProvider!, decode: nil, shouldInterpolate: true, intent: CGColorRenderingIntent.defaultIntent)
-
-		// Set proper orientation for photo
-		// If camera is currently set to front camera, flip image
-
-		let image = UIImage(cgImage: cgImageRef!, scale: 1.0, orientation: self.orientation.getImageOrientation(forCamera: self.currentCamera))
-
-		return image
-	}
-
-	fileprivate func capturePhotoAsyncronously(completionHandler: @escaping(Bool) -> ()) {
-
-        guard sessionRunning == true else {
-            print("[SwiftyCam]: Cannot take photo. Capture session is not running")
-            return
-        }
-
-		if let videoConnection = photoFileOutput?.connection(with: AVMediaType.video) {
-
-			photoFileOutput?.captureStillImageAsynchronously(from: videoConnection, completionHandler: {(sampleBuffer, error) in
-				if (sampleBuffer != nil) {
-					let imageData = AVCaptureStillImageOutput.jpegStillImageNSDataRepresentation(sampleBuffer!)
-					let image = self.processPhoto(imageData!)
-
-					// Call delegate and return new image
-					DispatchQueue.main.async {
-						self.cameraDelegate?.swiftyCam(self, didTake: image)
-					}
-					completionHandler(true)
-				} else {
-					completionHandler(false)
-				}
-			})
-		} else {
-			completionHandler(false)
 		}
 	}
 
@@ -874,13 +769,7 @@ open class SwiftyCamViewController: UIViewController {
 			let alertController = UIAlertController(title: "AVCam", message: message, preferredStyle: .alert)
 			alertController.addAction(UIAlertAction(title: NSLocalizedString("OK", comment: "Alert OK button"), style: .cancel, handler: nil))
 			alertController.addAction(UIAlertAction(title: NSLocalizedString("Settings", comment: "Alert button to open Settings"), style: .default, handler: { action in
-				if #available(iOS 10.0, *) {
-					UIApplication.shared.openURL(URL(string: UIApplication.openSettingsURLString)!)
-				} else {
-					if let appSettings = URL(string: UIApplication.openSettingsURLString) {
-						UIApplication.shared.openURL(appSettings)
-					}
-				}
+                UIApplication.shared.open(URL(string: UIApplication.openSettingsURLString)!)
 			}))
 			self.present(alertController, animated: true, completion: nil)
 		})
@@ -905,52 +794,15 @@ open class SwiftyCamViewController: UIViewController {
 		case .resolution1920x1080: return AVCaptureSession.Preset.hd1920x1080.rawValue
 		case .iframe960x540: return AVCaptureSession.Preset.iFrame960x540.rawValue
 		case .iframe1280x720: return AVCaptureSession.Preset.iFrame1280x720.rawValue
-		case .resolution3840x2160:
-			if #available(iOS 9.0, *) {
-				return AVCaptureSession.Preset.hd4K3840x2160.rawValue
-			}
-			else {
-				print("[SwiftyCam]: Resolution 3840x2160 not supported")
-				return AVCaptureSession.Preset.high.rawValue
-			}
+		case .resolution3840x2160: return AVCaptureSession.Preset.hd4K3840x2160.rawValue
 		}
 	}
 
 	/// Get Devices
 
 	fileprivate class func deviceWithMediaType(_ mediaType: String, preferringPosition position: AVCaptureDevice.Position) -> AVCaptureDevice? {
-		if #available(iOS 10.0, *) {
-				let avDevice = AVCaptureDevice.default(AVCaptureDevice.DeviceType.builtInWideAngleCamera, for: AVMediaType(rawValue: mediaType), position: position)
-				return avDevice
-		} else {
-				// Fallback on earlier versions
-				let avDevice = AVCaptureDevice.devices(for: AVMediaType(rawValue: mediaType))
-				var avDeviceNum = 0
-				for device in avDevice {
-						print("deviceWithMediaType Position: \(device.position.rawValue)")
-						if device.position == position {
-								break
-						} else {
-								avDeviceNum += 1
-						}
-				}
-
-				return avDevice[avDeviceNum]
-		}
-
-		//return AVCaptureDevice.devices(for: AVMediaType(rawValue: mediaType), position: position).first
-	}
-
-	/// Enable or disable flash for photo
-
-fileprivate func changeFlashSettings(device: AVCaptureDevice, mode: FlashMode) {
-		do {
-			try device.lockForConfiguration()
-			device.flashMode = mode.AVFlashMode
-			device.unlockForConfiguration()
-		} catch {
-			print("[SwiftyCam]: \(error)")
-		}
+        let avDevice = AVCaptureDevice.default(AVCaptureDevice.DeviceType.builtInWideAngleCamera, for: AVMediaType(rawValue: mediaType), position: position)
+        return avDevice
 	}
 
 	/// Enable flash
@@ -1012,14 +864,7 @@ fileprivate func changeFlashSettings(device: AVCaptureDevice, mode: FlashMode) {
         }
 
 		do{
-            if #available(iOS 10.0, *) {
-                try AVAudioSession.sharedInstance().setCategory(.playAndRecord, mode: .default, options: [.mixWithOthers, .allowBluetooth, .allowAirPlay, .allowBluetoothA2DP])
-            } else {
-                let options: [AVAudioSession.CategoryOptions] = [.mixWithOthers, .allowBluetooth]
-                              let category = AVAudioSession.Category.playAndRecord
-                let selector = NSSelectorFromString("setCategory:withOptions:error:")
-                AVAudioSession.sharedInstance().perform(selector, with: category, with: options)
-            }
+            try AVAudioSession.sharedInstance().setCategory(.playAndRecord, mode: .default, options: [.mixWithOthers, .allowBluetooth, .allowAirPlay, .allowBluetoothA2DP])
             try AVAudioSession.sharedInstance().setActive(true)
 			session.automaticallyConfiguresApplicationAudioSession = false
 		}
@@ -1050,34 +895,15 @@ fileprivate func changeFlashSettings(device: AVCaptureDevice, mode: FlashMode) {
 
 extension SwiftyCamViewController : SwiftyCamButtonDelegate {
 
-	/// Sets the maximum duration of the SwiftyCamButton
+	/// Begin video when the button is pressed down
 
-	public func setMaxiumVideoDuration() -> Double {
-		return maximumVideoDuration
-	}
-
-	/// Set UITapGesture to take photo
-
-	public func buttonWasTapped() {
-		takePhoto()
-	}
-
-	/// Set UILongPressGesture start to begin video
-
-	public func buttonDidBeginLongPress() {
+	public func buttonDidBeginPress() {
 		startVideoRecording()
 	}
 
-	/// Set UILongPressGesture begin to begin end video
+	/// End video when the button is released
 
-
-	public func buttonDidEndLongPress() {
-		stopVideoRecording()
-	}
-
-	/// Called if maximum duration is reached
-
-	public func longPressDidReachMaximumDuration() {
+	public func buttonDidEndPress() {
 		stopVideoRecording()
 	}
 }
@@ -1117,13 +943,21 @@ extension SwiftyCamViewController {
 
 	/// Handle pinch gesture
 
+    private var firstCaptureDevice: AVCaptureDevice? {
+        AVCaptureDevice.DiscoverySession(
+            deviceTypes: [.builtInDualCamera, .builtInWideAngleCamera],
+            mediaType: .video,
+            position: .unspecified
+        ).devices.first
+    }
+
 	@objc fileprivate func zoomGesture(pinch: UIPinchGestureRecognizer) {
 		guard pinchToZoom == true && self.currentCamera == .rear else {
 			//ignore pinch
 			return
 		}
 		do {
-			let captureDevice = AVCaptureDevice.devices().first
+			let captureDevice = firstCaptureDevice
 			try captureDevice?.lockForConfiguration()
 
 			zoomScale = min(maxZoomScale, max(1.0, min(beginZoomScale * pinch.scale,  captureDevice!.activeFormat.videoMaxZoomFactor)))
@@ -1198,7 +1032,7 @@ extension SwiftyCamViewController {
         let translationDifference = currentTranslation - previousPanTranslation
 
         do {
-            let captureDevice = AVCaptureDevice.devices().first
+            let captureDevice = firstCaptureDevice
             try captureDevice?.lockForConfiguration()
 
             let currentZoom = captureDevice?.videoZoomFactor ?? 0.0

@@ -62,10 +62,7 @@ class VideoViewController: UIViewController {
         
         // Allow background audio to continue to play
         do {
-            if #available(iOS 10.0, *) {
-                try AVAudioSession.sharedInstance().setCategory(AVAudioSession.Category.playback, mode: .default, options: [])
-            } else {
-            }
+            try AVAudioSession.sharedInstance().setCategory(AVAudioSession.Category.playback, mode: .default, options: [])
         } catch let error as NSError {
             print(error)
         }

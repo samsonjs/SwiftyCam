@@ -21,12 +21,12 @@ import AVFoundation
 
 /// Delegate for SwiftyCamViewController
 
-public protocol SwiftyCamViewControllerDelegate: class {
+public protocol SwiftyCamViewControllerDelegate: AnyObject {
     
     /**
      SwiftyCamViewControllerDelegate function called when when SwiftyCamViewController session did start running.
-     Photos and video capture will be enabled.
-     
+     Video capture will be enabled.
+
      - Parameter swiftyCam: Current SwiftyCamViewController
      */
     
@@ -34,21 +34,12 @@ public protocol SwiftyCamViewControllerDelegate: class {
     
     /**
      SwiftyCamViewControllerDelegate function called when when SwiftyCamViewController session did stops running.
-     Photos and video capture will be disabled.
-     
+     Video capture will be disabled.
+
      - Parameter swiftyCam: Current SwiftyCamViewController
      */
     
     func swiftyCamSessionDidStopRunning(_ swiftyCam: SwiftyCamViewController)
-    
-    /**
-     SwiftyCamViewControllerDelegate function called when the takePhoto() function is called.
-     
-     - Parameter swiftyCam: Current SwiftyCamViewController session
-     - Parameter photo: UIImage captured from the current session
-     */
-    
-    func swiftyCam(_ swiftyCam: SwiftyCamViewController, didTake photo: UIImage)
     
     /**
      SwiftyCamViewControllerDelegate function called when SwiftyCamViewController begins recording video.
@@ -142,21 +133,14 @@ public extension SwiftyCamViewControllerDelegate {
         // Optional
     }
     
-    func swiftyCam(_ swiftyCam: SwiftyCamViewController, didTake photo: UIImage) {
-        // Optional
-    }
-
-    
     func swiftyCam(_ swiftyCam: SwiftyCamViewController, didBeginRecordingVideo camera: SwiftyCamViewController.CameraSelection) {
         // Optional
     }
 
-    
     func swiftyCam(_ swiftyCam: SwiftyCamViewController, didFinishRecordingVideo camera: SwiftyCamViewController.CameraSelection) {
         // Optional
     }
 
-    
     func swiftyCam(_ swiftyCam: SwiftyCamViewController, didFinishProcessVideoAt url: URL) {
         // Optional
     }
@@ -168,13 +152,11 @@ public extension SwiftyCamViewControllerDelegate {
     func swiftyCam(_ swiftyCam: SwiftyCamViewController, didSwitchCameras camera: SwiftyCamViewController.CameraSelection) {
         // Optional
     }
-
     
     func swiftyCam(_ swiftyCam: SwiftyCamViewController, didFocusAtPoint point: CGPoint) {
         // Optional
     }
 
-    
     func swiftyCam(_ swiftyCam: SwiftyCamViewController, didChangeZoomLevel zoom: CGFloat) {
         // Optional
     }

@@ -71,6 +71,8 @@ class Orientation  {
             return AVCaptureVideoOrientation.landscapeRight
         case .portraitUpsideDown:
             return AVCaptureVideoOrientation.portraitUpsideDown
+        @unknown default:
+            return .portrait
         }
     }
     
