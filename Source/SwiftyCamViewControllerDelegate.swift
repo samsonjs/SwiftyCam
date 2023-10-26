@@ -45,7 +45,7 @@ public protocol SwiftyCamViewControllerDelegate: AnyObject {
      SwiftyCamViewControllerDelegate function called when SwiftyCamViewController begins recording video.
      
      - Parameter swiftyCam: Current SwiftyCamViewController session
-     - Parameter camera: Current camera orientation
+     - Parameter camera: Current camera position
      */
     
     func swiftyCam(_ swiftyCam: SwiftyCamViewController, didBeginRecordingVideo camera: SwiftyCamViewController.CameraSelection)
@@ -54,7 +54,7 @@ public protocol SwiftyCamViewControllerDelegate: AnyObject {
      SwiftyCamViewControllerDelegate function called when SwiftyCamViewController finishes recording video.
      
      - Parameter swiftyCam: Current SwiftyCamViewController session
-     - Parameter camera: Current camera orientation
+     - Parameter camera: Current camera position
      */
     
     func swiftyCam(_ swiftyCam: SwiftyCamViewController, didFinishRecordingVideo camera: SwiftyCamViewController.CameraSelection)

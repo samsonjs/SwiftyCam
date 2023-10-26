@@ -27,7 +27,6 @@ class ViewController: SwiftyCamViewController, SwiftyCamViewControllerDelegate {
 		super.viewDidLoad()
         shouldPrompToAppSettings = true
 		cameraDelegate = self
-        shouldUseDeviceOrientation = true
         allowAutoRotate = true
         audioEnabled = true
         flashMode = .auto

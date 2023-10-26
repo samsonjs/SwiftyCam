@@ -7,8 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		056AAB091F97CB1700F6A978 /* Orientation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 056AAB081F97CB1700F6A978 /* Orientation.swift */; };
-		056AAB0A1F97CB1E00F6A978 /* Orientation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 056AAB081F97CB1700F6A978 /* Orientation.swift */; };
 		05D2A9B81E80BE9700B479E9 /* SwiftyCam-iOS.h in Headers */ = {isa = PBXBuildFile; fileRef = 05D2A9B61E80BE9700B479E9 /* SwiftyCam-iOS.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		05D2A9BC1E80BE9D00B479E9 /* PreviewView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1675A9891E00A74A00B80903 /* PreviewView.swift */; };
 		05D2A9BD1E80BE9D00B479E9 /* SwiftyCamButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1675A98A1E00A74A00B80903 /* SwiftyCamButton.swift */; };
@@ -28,7 +26,6 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		056AAB081F97CB1700F6A978 /* Orientation.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = Orientation.swift; path = ../../Source/Orientation.swift; sourceTree = "<group>"; };
 		05D2A9B41E80BE9700B479E9 /* SwiftyCam.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = SwiftyCam.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		05D2A9B61E80BE9700B479E9 /* SwiftyCam-iOS.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "SwiftyCam-iOS.h"; sourceTree = "<group>"; };
 		05D2A9B71E80BE9700B479E9 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -111,7 +108,6 @@
 		1675A9911E00A74F00B80903 /* Source */ = {
 			isa = PBXGroup;
 			children = (
-				056AAB081F97CB1700F6A978 /* Orientation.swift */,
 				1675A9891E00A74A00B80903 /* PreviewView.swift */,
 				1675A98A1E00A74A00B80903 /* SwiftyCamButton.swift */,
 				1675A98B1E00A74A00B80903 /* SwiftyCamViewController.swift */,
@@ -236,7 +232,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				05D2A9BC1E80BE9D00B479E9 /* PreviewView.swift in Sources */,
-				056AAB0A1F97CB1E00F6A978 /* Orientation.swift in Sources */,
 				05D2A9BF1E80BE9D00B479E9 /* SwiftyCamViewControllerDelegate.swift in Sources */,
 				05D2A9BE1E80BE9D00B479E9 /* SwiftyCamViewController.swift in Sources */,
 				05D2A9BD1E80BE9D00B479E9 /* SwiftyCamButton.swift in Sources */,
@@ -252,7 +247,6 @@
 				168505E81E288B4C005B4537 /* VideoViewController.swift in Sources */,
 				1675A9761E00A68300B80903 /* AppDelegate.swift in Sources */,
 				1675A98F1E00A74A00B80903 /* SwiftyCamViewController.swift in Sources */,
-				056AAB091F97CB1700F6A978 /* Orientation.swift in Sources */,
 				16298B561E2703DC0056D413 /* SwiftyRecordButton.swift in Sources */,
 				1675A98D1E00A74A00B80903 /* PreviewView.swift in Sources */,
 				1675A98E1E00A74A00B80903 /* SwiftyCamButton.swift in Sources */,
@@ -392,7 +386,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				MTL_ENABLE_DEBUG_INFO = YES;
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = iphoneos;
@@ -448,7 +442,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				SDKROOT = iphoneos;
 				SWIFT_COMPILATION_MODE = wholemodule;
