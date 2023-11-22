@@ -21,16 +21,13 @@ class ViewController: SwiftyCamViewController, SwiftyCamViewControllerDelegate {
     
     @IBOutlet weak var captureButton    : SwiftyRecordButton!
     @IBOutlet weak var flipCameraButton : UIButton!
-    @IBOutlet weak var flashButton      : UIButton!
-    
+
 	override func viewDidLoad() {
 		super.viewDidLoad()
         shouldPrompToAppSettings = true
 		cameraDelegate = self
         allowAutoRotate = true
         audioEnabled = true
-        flashMode = .auto
-        flashButton.setImage(#imageLiteral(resourceName: "flashauto"), for: UIControl.State())
         captureButton.buttonEnabled = false
 	}
 
@@ -100,11 +97,6 @@ class ViewController: SwiftyCamViewController, SwiftyCamViewControllerDelegate {
     @IBAction func cameraSwitchTapped(_ sender: Any) {
         switchCamera()
     }
-    
-    @IBAction func toggleFlashTapped(_ sender: Any) {
-        //flashEnabled = !flashEnabled
-        toggleFlashAnimation()
-    }
 }
 
 
@@ -113,14 +105,12 @@ extension ViewController {
     
     fileprivate func hideButtons() {
         UIView.animate(withDuration: 0.25) {
-            self.flashButton.alpha = 0.0
             self.flipCameraButton.alpha = 0.0
         }
     }
     
     fileprivate func showButtons() {
         UIView.animate(withDuration: 0.25) {
-            self.flashButton.alpha = 1.0
             self.flipCameraButton.alpha = 1.0
         }
     }
@@ -143,19 +133,4 @@ extension ViewController {
             }
         }
     }
-    
-    fileprivate func toggleFlashAnimation() {
-        //flashEnabled = !flashEnabled
-        if flashMode == .auto{
-            flashMode = .on
-            flashButton.setImage(#imageLiteral(resourceName: "flash"), for: UIControl.State())
-        }else if flashMode == .on{
-            flashMode = .off
-            flashButton.setImage(#imageLiteral(resourceName: "flashOutline"), for: UIControl.State())
-        }else if flashMode == .off{
-            flashMode = .auto
-            flashButton.setImage(#imageLiteral(resourceName: "flashauto"), for: UIControl.State())
-        }
-    }
 }
-

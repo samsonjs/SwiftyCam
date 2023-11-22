@@ -43,28 +43,6 @@ open class SwiftyCamViewController: UIViewController {
         }
 	}
     
-    public enum FlashMode{
-        //Return the equivalent AVCaptureDevice.FlashMode
-        var AVFlashMode: AVCaptureDevice.FlashMode {
-            switch self {
-                case .on:
-                    return .on
-                case .off:
-                    return .off
-                case .auto:
-                    return .auto
-            }
-        }
-        //Flash mode is set to auto
-        case auto
-        
-        //Flash mode is set to on
-        case on
-        
-        //Flash mode is set to off
-        case off
-    }
-
 	/// Enumeration for video quality of the capture session. Corresponds to a AVCaptureSessionPreset
 
 
@@ -125,9 +103,6 @@ open class SwiftyCamViewController: UIViewController {
 	/// Video capture quality
 
 	public var videoQuality : VideoQuality       = .high
-
-    // Flash Mode
-    public var flashMode:FlashMode               = .off
 
 	/// Sets whether Pinch to Zoom is enabled for the capture session
 
@@ -226,10 +201,6 @@ open class SwiftyCamViewController: UIViewController {
 
 	fileprivate var beginZoomScale               = CGFloat(1.0)
 
-	/// Returns true if the torch (flash) is currently enabled
-
-	fileprivate var isCameraTorchOn              = false
-
 	/// Variable to store result of capture session setup
 
 	fileprivate var setupResult                  = SessionSetupResult.success
@@ -253,10 +224,6 @@ open class SwiftyCamViewController: UIViewController {
 	/// PreviewView for the capture session
 
 	fileprivate var previewLayer                 : PreviewView!
-
-	/// UIView for front facing flash
-
-	fileprivate var flashView                    : UIView?
 
     /// Pan Translation
 
@@ -412,9 +379,6 @@ open class SwiftyCamViewController: UIViewController {
 			self.isSessionRunning = false
 		}
 
-		//Disble flash if it is currently enabled
-		disableFlash()
-
 		// Unsubscribe from device rotation notifications
         rotationCoordinator = nil
 	}
@@ -437,17 +401,6 @@ open class SwiftyCamViewController: UIViewController {
         }
 		guard let movieFileOutput = self.movieFileOutput else {
 			return
-		}
-
-		if currentCamera == .rear && flashMode == .on {
-			enableFlash()
-		}
-
-		if currentCamera == .front && flashMode == .on  {
-			flashView = UIView(frame: view.frame)
-			flashView?.backgroundColor = UIColor.white
-			flashView?.alpha = 0.85
-			previewLayer.addSubview(flashView!)
 		}
 
 		sessionQueue.async { [unowned self] in
@@ -497,15 +450,7 @@ open class SwiftyCamViewController: UIViewController {
 		if self.isVideoRecording == true {
 			self.isVideoRecording = false
 			movieFileOutput!.stopRecording()
-			disableFlash()
 
-			if currentCamera == .front && flashMode == .on && flashView != nil {
-				UIView.animate(withDuration: 0.1, delay: 0.0, options: .curveEaseInOut, animations: {
-					self.flashView?.alpha = 0.0
-				}, completion: { (_) in
-					self.flashView?.removeFromSuperview()
-				})
-			}
 			DispatchQueue.main.async {
 				self.cameraDelegate?.swiftyCam(self, didFinishRecordingVideo: self.currentCamera)
 			}
@@ -556,9 +501,6 @@ open class SwiftyCamViewController: UIViewController {
 
 			self.session.startRunning()
 		}
-
-		// If flash is enabled, disable it as the torch is needed for front facing camera
-		disableFlash()
 	}
 
 	// MARK: Private Functions
@@ -768,53 +710,6 @@ open class SwiftyCamViewController: UIViewController {
             ?? AVCaptureDevice.default(.builtInDualCamera, for: .video, position: position)
             ?? AVCaptureDevice.default(.builtInDualWideCamera, for: .video, position: position)
             ?? AVCaptureDevice.default(.builtInWideAngleCamera, for: .video, position: position)
-	}
-
-	/// Enable flash
-
-	fileprivate func enableFlash() {
-		if self.isCameraTorchOn == false {
-			toggleFlash()
-		}
-	}
-
-	/// Disable flash
-
-	fileprivate func disableFlash() {
-		if self.isCameraTorchOn == true {
-			toggleFlash()
-		}
-	}
-
-	/// Toggles between enabling and disabling flash
-
-	fileprivate func toggleFlash() {
-		guard self.currentCamera == .rear else {
-			// Flash is not supported for front facing camera
-			return
-		}
-
-		let device = AVCaptureDevice.default(for: AVMediaType.video)
-		// Check if device has a flash
-		if (device?.hasTorch)! {
-			do {
-				try device?.lockForConfiguration()
-				if (device?.torchMode == AVCaptureDevice.TorchMode.on) {
-					device?.torchMode = AVCaptureDevice.TorchMode.off
-					self.isCameraTorchOn = false
-				} else {
-					do {
-						try device?.setTorchModeOn(level: 1.0)
-						self.isCameraTorchOn = true
-					} catch {
-						print("[SwiftyCam]: \(error)")
-					}
-				}
-				device?.unlockForConfiguration()
-			} catch {
-				print("[SwiftyCam]: \(error)")
-			}
-		}
 	}
 
 	/// Sets whether SwiftyCam should enable background audio from other applications or sources
